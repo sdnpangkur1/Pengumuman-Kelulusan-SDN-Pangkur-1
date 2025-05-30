@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="icon" href="nw.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+
+  <style>
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('city-background.png') center center / cover no-repeat;
+      opacity: 0.2;
+      z-index: -1;
+    }
+  </style>
+
+</head>
+<body class="bg-blue-900 text-white min-h-screen p-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Dashboard Admin</h1>
+    <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded">Logout</button>
+  </div>
+
+  <!-- Panel Atur Countdown -->
+  <div class="bg-blue-800 p-4 rounded-xl mb-6">
+    <h2 class="text-lg font-semibold mb-2">Atur Waktu Akses Kelulusan</h2>
+    <input type="datetime-local" id="waktuAksesInput" class="p-2 rounded text-black w-full max-w-sm mb-2">
+    <button onclick="simpanWaktuAkses()" class="bg-white text-blue-800 px-4 py-2 rounded">Simpan</button>
+    <div id="statusSimpanWaktu" class="text-sm mt-2"></div>
+  </div>
+
+  <!-- Form Tambah Siswa -->
+  <div class="bg-blue-800 p-4 rounded-xl mb-6">
+    <h2 class="text-lg font-semibold mb-2">Tambah Siswa</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <input id="tambahNISN" type="text" placeholder="NISN" class="p-2 rounded text-black">
+      <input id="tambahNama" type="text" placeholder="Nama Lengkap" class="p-2 rounded text-black">
+      <input id="tambahTanggal" type="text" placeholder="Tanggal Lahir (DDMMYYYY)" class="p-2 rounded text-black">
+      <input id="tambahNilai" type="number" placeholder="Nilai" class="p-2 rounded text-black">
+    </div>
+    <div class="mt-2">
+      <label><input type="checkbox" id="tambahLulus" class="mr-2">Lulus</label>
+    </div>
+    <button onclick="tambahSiswa()" class="mt-2 bg-white text-blue-800 px-4 py-2 rounded">Tambah</button>
+    <div id="statusTambah" class="text-sm mt-2"></div>
+  </div>
+
+  <!-- Tabel Data Siswa -->
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full bg-blue-800 rounded-xl">
+      <thead>
+        <tr>
+          <th class="px-4 py-2">NISN</th>
+          <th class="px-4 py-2">Nama</th>
+          <th class="px-4 py-2">Tanggal Lahir</th>
+          <th class="px-4 py-2">Nilai</th>
+          <th class="px-4 py-2">Lulus</th>
+          <th class="px-4 py-2">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelSiswa"></tbody>
+    </table>
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyDHGXTBAkCyxxsFkkeYAJ2znwsYd4tqhVo",
+      authDomain: "sdn-pangkur1.firebaseapp.com",
+      databaseURL: "https://sdn-pangkur1-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sdn-pangkur1",
+      storageBucket: "sdn-pangkur1.appspot.com",
+      messagingSenderId: "916172794638",
+      appId: "1:916172794638:web:8c50e0df42cc75aaa9c55f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function logout() {
+      localStorage.removeItem("admin");
+      window.location.href = "index.html";
+    }
+
+    function renderSiswa() {
+      db.ref("siswa").once("value", snap => {
+        const tbody = document.getElementById("tabelSiswa");
+        tbody.innerHTML = "";
+        snap.forEach(child => {
+          const data = child.val();
+          tbody.innerHTML += `
+            <tr>
+              <td class="border px-4 py-2">${child.key}</td>
+              <td class="border px-4 py-2">${data.nama}</td>
+              <td class="border px-4 py-2">${data.tanggal_lahir}</td>
+              <td class="border px-4 py-2">${data.nilai}</td>
+              <td class="border px-4 py-2">${data.lulus ? "Lulus" : "Tidak Lulus"}</td>
+              <td class="border px-4 py-2">
+                <button onclick="hapusSiswa('${child.key}')" class="bg-red-600 px-2 py-1 rounded text-sm">Hapus</button>
+              </td>
+            </tr>`;
+        });
+      });
+    }
+
+    function tambahSiswa() {
+      const nisn = document.getElementById("tambahNISN").value.trim();
+      const nama = document.getElementById("tambahNama").value.trim();
+      const tanggal = document.getElementById("tambahTanggal").value.trim();
+      const nilai = parseFloat(document.getElementById("tambahNilai").value.trim());
+      const lulus = document.getElementById("tambahLulus").checked;
+
+      if (!nisn || !nama || !tanggal || isNaN(nilai)) {
+        document.getElementById("statusTambah").textContent = "Mohon lengkapi semua data dengan benar.";
+        return;
+      }
+
+      db.ref("siswa/" + nisn).set({
+        nama: nama,
+        tanggal_lahir: tanggal,
+        nilai: nilai,
+        lulus: lulus
+      }, (error) => {
+        if (error) {
+          document.getElementById("statusTambah").textContent = "Gagal menambahkan data.";
+        } else {
+          document.getElementById("statusTambah").textContent = "Siswa berhasil ditambahkan.";
+          renderSiswa();
+        }
+      });
+    }
+
+    function hapusSiswa(nisn) {
+      if (confirm("Yakin ingin menghapus data siswa ini?")) {
+        db.ref("siswa/" + nisn).remove(() => renderSiswa());
+      }
+    }
+
+    function simpanWaktuAkses() {
+      const waktu = document.getElementById("waktuAksesInput").value;
+      if (!waktu) {
+        document.getElementById("statusSimpanWaktu").textContent = "Waktu tidak boleh kosong.";
+        return;
+      }
+      db.ref("pengaturan/waktu_akses").set(new Date(waktu).toISOString(), (error) => {
+        document.getElementById("statusSimpanWaktu").textContent = error ? "Gagal menyimpan." : "Waktu akses berhasil disimpan.";
+      });
+    }
+
+    // Auto load data siswa saat halaman dibuka
+    window.onload = renderSiswa;
+  </script>
+</body>
+</html>
