@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 TP. 2024/2025</title>
+  <title>PENGUMUMAN KELULUSAN SDN PANGKUR 1 TAHUN 2025</title>
   <link rel="icon" href="nw.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
@@ -24,13 +24,13 @@
 <body class="bg-blue-900 bg-opacity-90 text-white min-h-screen flex flex-col justify-between relative">
   <div class="p-4 sm:p-6 text-center">
     <img src="logo.png" alt="Logo" class="mx-auto w-20 mb-4" />
-    <h1 id="judulUtama" class="text-2xl sm:text-3xl font-bold text-yellow-300 mb-2">
-  PENGUMUMAN KELULUSAN SDN PANGKUR 1 TP. 2024/2025
+    <h1 id="judulUtama" class="text-3xl sm:text-3xl font-extrabold text-yellow-300 mb-2">
+  PENGUMUMAN KELULUSAN SDN PANGKUR 1 TAHUN 2025
 </h1>
 <p id="loginInstruction" class="text-white text-lg text-center mb-4 hidden">
   Silakan login menggunakan NISN dan Tanggal Lahir
 </p>
-    <div id="countdown" class="mb-4 text-lg font-semibold"></div>
+    <div id="countdown" class="bg-red-500 py-2 rounded-lg w-full max-w-md mx-auto text-white-400 text-lg font-semibold mt-12"></div>
 
     
     <!-- Form Login Siswa -->
@@ -165,7 +165,7 @@
     </div>
   </div>
 
-  <footer class="text-center p-2 text-sm mt-32">
+  <footer class="justify-end min-h-screen-4 font-light text-white mb-1">
     &copy; Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi
   </footer>
 
@@ -211,14 +211,15 @@
 
     if (selisih <= 0) {
       clearInterval(interval);
-      countdownEl.textContent = "";
-      loginForm.classList.remove("hidden");
-      loginInstruction.classList.remove("hidden"); // 👈 Tampilkan instruksi login
+  countdownEl.textContent = "";
+  countdownEl.classList.add("hidden"); // 👉 ini akan menyembunyikan elemen
+  loginForm.classList.remove("hidden");
+  loginInstruction.classList.remove("hidden"); // 👈 Tampilkan instruksi login
     } else {
       const jam = Math.floor(selisih / (1000 * 60 * 60));
       const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
       const detik = Math.floor((selisih % (1000 * 60)) / 1000);
-      countdownEl.textContent = `Akses dibuka dalam ${jam}j ${menit}m ${detik}d`;
+      countdownEl.textContent = `Akses dibuka dalam ${jam}j ${menit}m ${detik}d`; 
     }
   }, 1000);
 }
