@@ -91,13 +91,23 @@
       password: "admin123"
     };
 
-    const batasAkses = new Date("2025-06-10T08:00:00").getTime();
     const countdownEl = document.getElementById("countdown");
-    const loginForm = document.getElementById("loginForm");
+  const loginForm = document.getElementById("loginForm");
 
+  // Ambil waktu akses dari Realtime Database
+  db.ref("pengaturan/waktu_akses").once("value", snap => {
+    if (snap.exists()) {
+      const waktuAkses = new Date(snap.val()).getTime();
+      mulaiCountdown(waktuAkses);
+    } else {
+      countdownEl.textContent = "Waktu akses belum diatur oleh admin.";
+    }
+  });
+
+  function mulaiCountdown(batasAkses) {
     const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const selisih = batasAkses - now;
+      const sekarang = new Date().getTime();
+      const selisih = batasAkses - sekarang;
       if (selisih <= 0) {
         clearInterval(interval);
         countdownEl.textContent = "Silakan login menggunakan NISN dan Tanggal Lahir";
@@ -109,6 +119,7 @@
         countdownEl.textContent = `Akses dibuka dalam ${jam}j ${menit}m ${detik}d`;
       }
     }, 1000);
+  }
 
     function loginSiswa() {
       const nisn = document.getElementById("nisn").value;
