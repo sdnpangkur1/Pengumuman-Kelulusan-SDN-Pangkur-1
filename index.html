@@ -18,32 +18,117 @@
       opacity: 0.2;
       z-index: -1;
     }
+    
   </style>
 </head>
 <body class="bg-blue-900 bg-opacity-90 text-white min-h-screen flex flex-col justify-between relative">
   <div class="p-4 sm:p-6 text-center">
     <img src="logo.png" alt="Logo" class="mx-auto w-20 mb-4" />
-    <h1 class="text-2xl sm:text-3xl font-bold mb-2">
-      PENGUMUMAN KELULUSAN SDN PANGKUR 1 TP. 2024/2025
-    </h1>
+    <h1 id="judulUtama" class="text-2xl sm:text-3xl font-bold text-yellow-300 mb-2">
+  PENGUMUMAN KELULUSAN SDN PANGKUR 1 TP. 2024/2025
+</h1>
+<p id="loginInstruction" class="text-white text-lg text-center mb-4 hidden">
+  Silakan login menggunakan NISN dan Tanggal Lahir
+</p>
     <div id="countdown" class="mb-4 text-lg font-semibold"></div>
 
+    
     <!-- Form Login Siswa -->
     <div id="loginForm" class="bg-blue-800 bg-opacity-95 p-6 rounded-xl w-full max-w-sm mx-auto hidden shadow-lg">
       <h2 class="text-xl font-semibold mb-4">Login Siswa</h2>
       <input id="nisn" type="text" placeholder="NISN"
         class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      <input id="tanggal" type="text" placeholder="Tanggal Lahir (DDMMYYYY)"
-        class="w-full p-2 mb-4 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      <button onclick="loginSiswa()"
-        class="bg-white text-blue-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">Login</button>
-    </div>
+      <div class="relative mb-4">
+  <input id="tanggal" type="password" placeholder="Tanggal Lahir (DDMMYYYY)"
+    class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+  <button type="button" onclick="toggleTanggal()" class="absolute inset-y-0 right-2 flex items-center">
+    <svg id="eyeTanggalIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+    </svg>
+  </button>
+</div>
+
+      <button id="loginBtn" onclick="loginSiswa()"
+  class="bg-yellow-400 text-blue-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">
+  Login
+</button>
+
+    
+  <!-- Loading Progress Bar (hidden awalnya) -->
+<div id="loadingBar" class="hidden w-full max-w-sm mx-auto mt-6">
+  <div class="w-full bg-gray-300 rounded-full h-4 overflow-hidden">
+    <div class="bg-yellow-400 h-full animate-pulseBar"></div>
+  </div>
+  <div class="mt-2 text-sm text-white-700">Menyiapkan data kelulusan...</div>
+</div>
+
+<style>
+  @keyframes pulseBar {
+    0% {
+      width: 0%;
+      background-position: 0 0;
+    }
+    100% {
+      width: 100%;
+      background-position: 100px 0; /* geser background */
+    }
+  }
+
+  .animate-pulseBar {
+    animation-name: pulseBar;
+    animation-duration: 15s;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+
+    background-color: #10B981; /* hijau emerald */
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 0px,
+      rgba(255, 255, 255, 0.15) 10px,
+      transparent 10px,
+      transparent 20px
+    );
+    background-size: 40px 40px;
+    background-repeat: repeat;
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  const loginBtn = document.getElementById('loginBtn');
+  const loadingBar = document.getElementById('loadingBar');
+
+  loginBtn.addEventListener('click', () => {
+    // Tampilkan loading bar
+    loadingBar.classList.remove('hidden');
+
+    // Optional: disable tombol login agar tidak bisa diklik berulang kali
+    loginBtn.disabled = true;
+
+          // Sembunyikan loading bar lagi
+      loadingBar.classList.add('hidden');
+
+      // Aktifkan kembali tombol login
+      loginBtn.disabled = false;
+    }, 3000);
+ ;
+</script>
+</style>
+
+      </div>
 
     <!-- Hasil Kelulusan -->
     <div id="hasilKelulusan" class="hidden mt-6">
-  <div id="namaSiswa" class="text-2xl font-bold text-yellow-300 mb-4"></div>
+  <div id="namaSiswa" class="text-2xl font-bold text-white-300 mb-8"></div>
   <div id="statusKelulusan" class="text-xl font-bold mb-4"></div>
-  <div id="nilaiSiswa" class="text-lg font-bold mb-6"></div>
+  <div id="nilaiSiswa" class="text-xl text-yellow-300 font-bold mb-6"></div>
   <div class="text-sm mb-1">Nilai ambang batas: 70</div>
   <div id="pesanKelulusan" class="text-md"></div>
   <button onclick="logoutSiswa()" class="mt-4 bg-red-600 px-4 py-2 rounded hover:bg-red-700 transition">Logout</button>
@@ -61,14 +146,26 @@
       <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
       <input id="adminUsername" type="text" placeholder="Username"
         class="w-full p-2 mb-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      <input id="adminPassword" type="password" placeholder="Password"
-        class="w-full p-2 mb-4 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+     <div class="relative mb-4">
+  <input id="adminPassword" type="password" placeholder="Password"
+    class="w-full p-2 pr-10 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-400" />
+  <button type="button" onclick="toggleAdminPassword()" class="absolute inset-y-0 right-2 flex items-center">
+    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />
+    </svg>
+  </button>
+</div>
+
       <button onclick="loginAdmin()"
-        class="bg-white text-blue-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">Login</button>
+        class="bg-yellow-400 text-white-800 px-4 py-2 rounded w-full hover:bg-blue-200 transition">Login</button>
     </div>
   </div>
 
-  <footer class="text-center p-4 text-sm bg-blue-800 mt-12">
+  <footer class="text-center p-2 text-sm mt-32">
     &copy; Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi
   </footer>
 
@@ -105,44 +202,71 @@
   });
 
   function mulaiCountdown(batasAkses) {
-    const interval = setInterval(() => {
-      const sekarang = new Date().getTime();
-      const selisih = batasAkses - sekarang;
-      if (selisih <= 0) {
-        clearInterval(interval);
-        countdownEl.textContent = "Silakan login menggunakan NISN dan Tanggal Lahir";
-        loginForm.classList.remove("hidden");
-      } else {
-        const jam = Math.floor(selisih / (1000 * 60 * 60));
-        const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
-        const detik = Math.floor((selisih % (1000 * 60)) / 1000);
-        countdownEl.textContent = `Akses dibuka dalam ${jam}j ${menit}m ${detik}d`;
-      }
-    }, 1000);
-  }
+  const interval = setInterval(() => {
+    const sekarang = new Date().getTime();
+    const selisih = batasAkses - sekarang;
+    const countdownEl = document.getElementById("countdown"); // pastikan ID-nya benar
+    const loginForm = document.getElementById("loginForm");
+    const loginInstruction = document.getElementById("loginInstruction");
 
-    function loginSiswa() {
-      const nisn = document.getElementById("nisn").value;
-      const tanggal = document.getElementById("tanggal").value;
-      db.ref("siswa/" + nisn).once("value", snap => {
-        if (snap.exists() && snap.val().tanggal_lahir === tanggal) {
-          const data = snap.val();
-          loginForm.classList.add("hidden");
-          setTimeout(() => {
-            document.getElementById("hasilKelulusan").classList.remove("hidden");
-            document.getElementById("statusKelulusan").innerHTML = data.lulus
-              ? '<div class="bg-green-600 p-6 rounded-xl shadow">SELAMAT ANDA DINYATAKAN LULUS</div>'
-              : '<div class="bg-red-700 p-6 rounded-xl shadow">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
-            document.getElementById("nilaiSiswa").textContent = "Nilai Anda: " + data.nilai;
-            document.getElementById("pesanKelulusan").textContent = data.lulus
-              ? "Selamat dan sukses untuk jenjang selanjutnya!"
-              : "Tetap semangat, masih ada banyak kesempatan untuk belajar!";
-          }, 1500);
-        } else {
-          alert("Data tidak ditemukan atau salah!");
-        }
-      });
+    if (selisih <= 0) {
+      clearInterval(interval);
+      countdownEl.textContent = "";
+      loginForm.classList.remove("hidden");
+      loginInstruction.classList.remove("hidden"); // 👈 Tampilkan instruksi login
+    } else {
+      const jam = Math.floor(selisih / (1000 * 60 * 60));
+      const menit = Math.floor((selisih % (1000 * 60 * 60)) / (1000 * 60));
+      const detik = Math.floor((selisih % (1000 * 60)) / 1000);
+      countdownEl.textContent = `Akses dibuka dalam ${jam}j ${menit}m ${detik}d`;
     }
+  }, 1000);
+}
+
+
+   function loginSiswa() {
+  const nisn = document.getElementById("nisn").value;
+  const tanggal = document.getElementById("tanggal").value;
+  const loginForm = document.getElementById("loginForm");
+  const loadingBar = document.getElementById("loadingBar");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Tampilkan loading bar
+  loadingBar.classList.remove("hidden");
+  loginBtn.disabled = true;
+
+  // Ambil data siswa dari Firebase
+  db.ref("siswa/" + nisn).once("value", snap => {
+    if (snap.exists() && snap.val().tanggal_lahir === tanggal) {
+      const data = snap.val();
+
+      document.getElementById("judulUtama").textContent = "HASIL KELULUSAN SDN PANGKUR 1 TAHUN 2025";
+      document.getElementById("namaSiswa").textContent = data.nama;
+
+      setTimeout(() => {
+        loadingBar.classList.add("hidden");
+        loginBtn.disabled = false;
+
+        loginForm.classList.add("hidden");
+        document.getElementById("loginInstruction").classList.add("hidden");
+        document.getElementById("hasilKelulusan").classList.remove("hidden");
+
+        document.getElementById("statusKelulusan").innerHTML = data.lulus
+          ? '<div class="bg-green-600 p-6 rounded-xl shadow">SELAMAT ANDA DINYATAKAN LULUS</div>'
+          : '<div class="bg-red-700 p-6 rounded-xl shadow">MAAF, ANDA DINYATAKAN TIDAK LULUS</div>';
+        document.getElementById("nilaiSiswa").textContent = "Nilai Anda: " + data.nilai;
+        document.getElementById("pesanKelulusan").textContent = data.lulus
+          ? "Selamat dan sukses untuk jenjang selanjutnya!"
+          : "Tetap semangat, masih ada banyak kesempatan untuk belajar!";
+      }, 15000); // loading animasi delay
+    } else {
+      loadingBar.classList.add("hidden");
+      loginBtn.disabled = false;
+      alert("Data tidak ditemukan atau salah!");
+    }
+  });
+}
+
 
     function logoutSiswa() {
       document.getElementById("hasilKelulusan").classList.add("hidden");
@@ -170,6 +294,45 @@
         alert("Username atau password salah");
       }
     }
+
+function toggleAdminPassword() {
+  const input = document.getElementById("adminPassword");
+  const icon = document.getElementById("eyeIcon");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.965 9.965 0 012.665-4.178m2.1-1.502A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.955 9.955 0 01-4.42 5.336M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l8 8m-8-8L4 20" />`;
+  } else {
+    input.type = "password";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />`;
+  }
+}
+
+function toggleTanggal() {
+  const input = document.getElementById("tanggal");
+  const icon = document.getElementById("eyeTanggalIcon");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.965 9.965 0 012.665-4.178m2.1-1.502A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.955 9.955 0 01-4.42 5.336M15 12a3 3 0 00-3-3m0 0a3 3 0 00-3 3m3-3l8 8m-8-8L4 20" />`;
+  } else {
+    input.type = "password";
+    icon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M2.458 12C3.732 7.943 7.522 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7s-8.268-2.943-9.542-7z" />`;
+  }
+}
+
   </script>
 </body>
 </html>
